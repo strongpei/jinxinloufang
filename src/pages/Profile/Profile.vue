@@ -193,7 +193,6 @@ import HeaderTop from '../../components/HeaderTop/HeaderTop'
             span
               color #6ac20b
     .profile_my_order
-      margin-top 10px
       background #fff
       .my_order
         display flex
@@ -216,6 +215,7 @@ import HeaderTop from '../../components/HeaderTop/HeaderTop'
           .icon-fuwuzhongxin
             color #02a774
             font-size 25px
+            margin-left -5px
         .my_order_div
           width 100%
           border-bottom 1px solid #f1f1f1

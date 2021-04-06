@@ -9,6 +9,7 @@ import Search from '../pages/Search/Search.vue'
 import Order from '../pages/Order/Order.vue'
 import Profile from '../pages/Profile/Profile.vue'
 import Login from '../pages/Login/Login.vue'
+import Ceshi from '../pages/Ceshi/Ceshi.vue'
 
 Vue.use(VueRouter)
 
@@ -51,6 +52,13 @@ export default new VueRouter({
     {
       path: '/login',
       component: Login,
+      meta:{
+        showFooter:false
+      }
+    },
+    {
+      path: '/ceshi',
+      component: Ceshi,
       meta:{
         showFooter:false
       }

@@ -9,14 +9,14 @@
         </div>
       </div>
       <div class="login_content">
-        <form>
+        <form @submit.prevent="login">
           <div :class="{on:isLogin}">
             <section class="login_message">
-              <input type="tel" maxlength="11" placeholder="手机号">
-              <button disabled="disabled" class="get_verification" >获取验证码</button>
+              <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
+              <button :disabled="!rightPhone" class="get_verification" :class="{right_phone:rightPhone}" @click.prevent="getCode">{{computedTime>0?`已发送(${computedTime})s`:'发送验证码'}}</button>
             </section>
             <section class="login_verification">
-              <input type="tel" maxlength="8" placeholder="验证码">
+              <input type="tel" maxlength="8" placeholder="验证码" v-model="code">
             </section>
             <section class="login_hint">
               温馨提示：未注册硅谷外卖帐号的手机号，登录时将自动注册，且代表已同意
@@ -26,17 +26,18 @@
           <div :class="{on:!isLogin}">
             <section>
               <section class="login_message">
-                <input type="tel" maxlength="11" placeholder="手机/邮箱/用户名">
+                <input type="text" maxlength="11" placeholder="手机/邮箱/用户名" v-model="name">
               </section>
               <section class="login_verification">
-                <input type="tel" maxlength="8" placeholder="密码">
-                <div class="switch_button off">
-                  <div class="switch_circle"></div>
-                  <span class="switch_text">...</span>
+                <input type="text" maxlength="8" placeholder="密码" v-model="pwd" v-if="showPwd"> 
+                <input type="password" maxlength="8" placeholder="密码" v-model="pwd" v-else> 
+                <div class="switch_button" @click="showPwd=!showPwd" :class="showPwd? 'on':'off'">
+                  <div class="switch_circle" :class="{right:showPwd}"></div>
+                  <span class="switch_text">{{showPwd? 'abc':''}}</span>
                 </div>
               </section>
               <section class="login_message">
-                <input type="text" maxlength="11" placeholder="验证码">
+                <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
                 <img class="get_verification" src="./images/captcha.svg" alt="captcha">
               </section>
             </section>
@@ -49,17 +50,78 @@
         <i class="iconfont icon-jiantou2"></i>
       </span>
     </div>
+    <AlertTip :Alert="Alert" v-show="showAlert" @fenfa="fenfa"/>
   </div>
 </template>
 
 <script>
+  import AlertTip from '../../components/AlertTip/AlertTip'
   export default {
       data() {
         return {
-          isLogin:true,
-          isLo:true
+          isLogin:true,    //true短信登陆 false手机号登陆
+          computedTime:0,  //计时时间
+          phone:'',        //手机号数据
+          pwd:'',          //密码数据
+          showPwd:false,   //是否显示密码
+          code:'',         //短信验证码
+          name:'',         //用户名
+          captcha:'',        //图形验证码
+          Alert:'',
+          showAlert:false
+        }
+      },     
+      computed:{
+        rightPhone(){
+          return /^1\d{10}$/.test(this.phone)
         }
       },
+      methods: {
+        getCode(){
+          if(!this.computedTime){
+            this.computedTime=30
+            const intervalId = setInterval(() => {
+              this.computedTime--
+                if(this.computedTime<=0){
+                clearInterval(intervalId)
+                }
+              }, 1000)   
+            }     
+        },
+        AlertShow(Alert){
+          this.showAlert=true,
+          this.Alert=Alert
+        },
+        login(){
+          if(this.isLogin){
+            //短信登陆
+            const {rightPhone,phone,code} = this // eslint-disable-line no-unused-vars
+            if(!this.rightPhone){
+              this.AlertShow('手机号不正确')
+            }else if(!/^\d{6}$/.test(code)){
+              this.AlertShow('验证码不正确')
+            }
+          }else{
+            //用户名登陆
+            const {name,pwd,captcha} = this // eslint-disable-line no-unused-vars
+            if(!this.name){
+              this.AlertShow('用户名不正确')
+            }else if(!this.pwd){
+              this.AlertShow('密码不正确')
+            }else if(!this.captcha){
+              this.AlertShow('验证码不正确')
+            }
+          }
+        },
+        fenfa(){
+          this.showAlert=false,
+          this.Alert=''
+        }
+      },
+      
+      components:{
+        AlertTip
+      }
   }
 </script>
 
@@ -124,6 +186,8 @@
                 color #ccc
                 font-size 14px
                 background transparent
+                &.right_phone
+                  color black 
             .login_verification
               position relative
               margin-top 16px
@@ -163,6 +227,8 @@
                   background #fff
                   box-shadow 0 2px 4px 0 rgba(0,0,0,.1)
                   transition transform .3s
+                  &.right
+                    transform translateX(30px)
             .login_hint
               margin-top 12px
               color #999
